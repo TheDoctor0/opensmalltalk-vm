@@ -81,8 +81,9 @@ jobs:
       - name: Pack VM
         uses: thedoctor0/zip-release@master
         with:
+          type: 'tar'
           path: 'products/vm'
-          filename: 'products/${{ env.IDENTIFIER }}_${{ env.REVISION }}.zip'
+          filename: 'products/${{ env.IDENTIFIER }}_${{ env.REVISION }}.tar'
           exclusions: '*.def *.exp *.lib *.map *.o *.res *Unstripped* *.ignore'
 
       # - name: Setup tmate debugging session
