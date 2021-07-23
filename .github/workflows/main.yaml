@@ -79,31 +79,9 @@ jobs:
         # uses: mxschmitt/action-tmate@v3
 
       - name: Pack VM
-        uses: thedoctor0/zip-release@master
+        uses: thedoctor0/zip-release@windows-support
         with:
-          type: 'tar'
+          type: 'zip'
           path: 'products/vm'
-          filename: 'products/${{ env.IDENTIFIER }}_${{ env.REVISION }}.tar'
+          filename: 'products/${{ env.IDENTIFIER }}_${{ env.REVISION }}.zip'
           exclusions: '*.def'
-
-      # - name: Setup tmate debugging session
-      #   uses: mxschmitt/action-tmate@v3
-
-      - name: Remove old assets
-        uses: flcdrg/remove-release-asset-action@v1.0.8
-        with:
-          release_id: latest-build
-          asset_name: "*${{ env.FLAVOR }}_${{ env.ARCH }}*.*"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish new assets
-        uses: ncipollo/release-action@v1.8.6
-        with:
-          prerelease: true
-          allowUpdates: true
-          replacesArtifacts: true
-          artifacts: "products/${{ env.IDENTIFIER }}.*"
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: latest-build
-          body: ${{ github.event.head_commit.message }}
