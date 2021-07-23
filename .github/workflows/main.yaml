@@ -84,7 +84,7 @@ jobs:
           type: 'tar'
           path: 'products/vm'
           filename: 'products/${{ env.IDENTIFIER }}_${{ env.REVISION }}.tar'
-          exclusions: '*.def *.exp *.lib *.map *.o *.res *Unstripped* *.ignore'
+          exclusions: '*.def'
 
       # - name: Setup tmate debugging session
       #   uses: mxschmitt/action-tmate@v3
