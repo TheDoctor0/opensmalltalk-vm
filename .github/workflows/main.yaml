@@ -8,10 +8,6 @@ on:
       - '**HowToBuild'
       - '.appveyor.yml'
       - '.travis.yml'
-  # pull_request:
-    # branches: []
-  # schedule:
-    # - cron: '0 7 * * *' # PDT about midnight
 
 
 jobs:
