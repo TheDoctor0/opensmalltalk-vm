@@ -1,0 +1,118 @@
+name: Build all VM flavors
+
+on:
+  push:
+    branches: [ TheDoctor0/Cog ]
+    paths-ingore:
+      - '**.md'
+      - '**HowToBuild'
+      - '.appveyor.yml'
+      - '.travis.yml'
+  # pull_request:
+    # branches: []
+  # schedule:
+    # - cron: '0 7 * * *' # PDT about midnight
+
+
+jobs:
+
+  # build-ubuntu:
+  #   strategy:
+  #     fail-fast: true
+  #     matrix:
+  #       arch: [ linux64x64, linux32x86 ]
+  #       flavor:
+  #         - squeak.cog.spur
+  #         - squeak.stack.spur
+  #       include: # compatibility with Squeak 4.6 and older
+  #         - arch: linux32x86
+  #           flavor: squeak.cog.v3
+  #         - arch: linux32x86
+  #           flavor: squeak.stack.v3
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+
+
+  # build-macos:
+  #   strategy:
+  #     fail-fast: true
+  #     matrix:
+  #       arch: [ macos64x64, macos32x86 ]
+  #       flavor:
+  #         - squeak.cog.spur
+  #         - squeak.stack.spur
+  #   runs-on: macos-latest
+  #   name: ${{ matrix.flavor }} for ${{ matrix.arch }} on ${{ runner.os }}
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Build on macOS
+  #       if: contains(matrix.)
+
+
+  build-windows:
+    strategy:
+      fail-fast: true
+      matrix:
+        arch:
+          - path: win64x64
+            msys-sys: mingw64
+            msys-env: x86_64
+          # - path: win32x86
+          #   msys-sys: mingw32
+          #   msys-env: i686
+        flavor:
+          - squeak.cog.spur
+          # - squeak.stack.spur
+        # compatibility with Squeak 4.6 and older
+    #     include:
+    #       - arch: win32x86
+    #         flavor: squeak.cog.v3
+    #       - arch: win32x86
+    #         flavor: squeak.stack.v3
+    runs-on: windows-latest
+    name: ${{ matrix.flavor }} for ${{ matrix.arch.path }}
+    env:
+      ARCH: ${{ matrix.arch.path }}
+      FLAVOR: ${{ matrix.flavor }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build VM
+        shell: bash
+        run: ./scripts/ci/actions_build.sh
+        env:
+          MSYS_SYS: ${{ matrix.arch.msys-sys }}
+          MSYS_ENV: ${{ matrix.arch.msys-env }}
+
+      # - name: Setup tmate debugging session
+        # uses: mxschmitt/action-tmate@v3
+
+      - name: Pack VM
+        uses: thedoctor0/zip-release@master
+        with:
+          path: 'products/vm'
+          filename: 'products/${{ env.IDENTIFIER }}_${{ env.REVISION }}.zip'
+          exclusions: '*.def *.exp *.lib *.map *.o *.res *Unstripped* *.ignore'
+
+      # - name: Setup tmate debugging session
+      #   uses: mxschmitt/action-tmate@v3
+
+      - name: Remove old assets
+        uses: flcdrg/remove-release-asset-action@v1.0.8
+        with:
+          release_id: latest-build
+          asset_name: "*${{ env.FLAVOR }}_${{ env.ARCH }}*.*"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish new assets
+        uses: ncipollo/release-action@v1.8.6
+        with:
+          prerelease: true
+          allowUpdates: true
+          replacesArtifacts: true
+          artifacts: "products/${{ env.IDENTIFIER }}.*"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: latest-build
+          body: ${{ github.event.head_commit.message }}
