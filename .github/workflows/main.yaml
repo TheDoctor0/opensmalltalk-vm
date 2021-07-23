@@ -2,13 +2,7 @@ name: Build all VM flavors
 
 on:
   push:
-    branches: [ TheDoctor0/Cog ]
-    paths-ingore:
-      - '**.md'
-      - '**HowToBuild'
-      - '.appveyor.yml'
-      - '.travis.yml'
-
+    branches: '*'
 
 jobs:
 
